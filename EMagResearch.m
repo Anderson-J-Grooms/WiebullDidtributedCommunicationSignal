@@ -10,24 +10,23 @@ kC = 2;
 
 count = 1;
 clutter = linspace(25,0.01,100);
-noise = linspace(52,0.04,100);
-SCR = zeros(1,100);
-SNR = zeros(1,100);
+noise = linspace(25,0.01,100);
+SCR_AVG = zeros(1,100);
+SNR_AVG = zeros(1,100);
 error = zeros(1,100);
 error2 = zeros(1,100);
 
 M = wblrnd(mD,kM,1,100); %Generate noise using decimal message as lambda
-C = wblrnd(lC,kC,1,100); %Generate clutter
-N = randn(1,100); %Generate noise
-
-Cs = wblrnd(lC,kC,1,100); %Clutter "samples" at reciever
-Ns = randn(1,100); %Noise "samples" at receiver
 
 % %Check different SCR values
 % while count <= 100
 %     loop = 1;
 %     ER = 0;
+%     SCR = 0;
 %     while loop <= 1000
+%         C = wblrnd(lC,kC,1,100); %Generate clutter
+%         N = randn(1,100); %Generate noise
+%         
 %         Cs = wblrnd(lC,kC,1,100); %Clutter "samples" at reciever
 %         Ns = randn(1,100); %Noise "samples" at receiver
 %         
@@ -42,10 +41,11 @@ Ns = randn(1,100); %Noise "samples" at receiver
 % 
 %         ER = ER + Rlam - mD;
 %         loop = loop + 1;
+%         SCR = SCR + 10*log10(sum(M.^2)/sum((C*clutter(count)).^2));
 %     end
-%     SCR(count) = 10*log10(sum(M.^2)/sum(C*clutter(count).^2));
+%     SCR_AVG(count) = SCR/1000;
 %     error(count) = ER/1000;
-%     count = count + 1;
+%     count = count + 1;    
 % end
 
 count = 1;
@@ -53,7 +53,11 @@ count = 1;
 while count <= 100
     loop = 1;
     ER = 0;
+    SNR = 0;
     while loop <= 1000
+        C = wblrnd(lC,kC,1,100); %Generate clutter
+        N = randn(1,100); %Generate noise
+        
         Cs = wblrnd(lC,kC,1,100); %Clutter "samples" at reciever
         Ns = randn(1,100); %Noise "samples" at receiver
         
@@ -65,13 +69,15 @@ while count <= 100
         Rpdf = ksdensity(ifft(RX));
         Rmean = dot(x,Rpdf)/sum(Rpdf);
         Rlam = Rmean/gamma(1+1/kM);
+        
+        SNR = SNR + 10*log10(sum(M.^2)/sum((N*noise(count)).^2));
 
         ER = ER + Rlam - mD;
         loop = loop + 1;
     end
-    SNR(count) = 10*log10(sum(M.^2)/sum(N*noise(count).^2));
+    SNR_AVG(count) = SNR/1000;
     error2(count) = ER/1000;
     count = count + 1;
 end
 
-plot(SNR,error2);
+plot(SNR_AVG,error2);
