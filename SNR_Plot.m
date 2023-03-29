@@ -26,7 +26,7 @@ while count <= 1000
         ns = pdf(nsPDF,width);
         
         %Calcualte the transmitted signal and recieved signal
-        TX = conv(m,conv(c,n));
+        TX = conv(m,conv(c,n*noise(count)));
         out = conv(cs,ns*noise(count));
         RX = ifft(fft(TX)./fft([out zeros(1,250)]));
         RX = RX(1:length(m));
